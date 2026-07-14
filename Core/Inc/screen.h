@@ -1,0 +1,20 @@
+#ifndef screen_H_
+#define screen_H_
+
+#include "ILI9341_GFX.h"
+
+void definition_of_coordinates();
+void screen_menu ();
+void screen_Brain_Ring();
+void The_coordinate_grid ();
+void screen_Erudit_Quartet();
+void screen_setting ();
+void tournament_table ();
+void button_event_handler();
+void base_setting_color();
+void reset_color ();
+void reset_falsstart(void);
+void sub_window_scope (void);
+
+
+#endif
