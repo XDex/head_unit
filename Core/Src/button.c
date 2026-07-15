@@ -12,6 +12,7 @@
 #include "ILI9341_GFX.h"
 #include "xpt2046_touch.h"
 #include <stdio.h>
+#include <string.h>
 
 extern uint8_t rx_data;
 extern uint8_t on_off;
@@ -23,23 +24,17 @@ extern uint16_t x;
 extern uint16_t y;
 extern uint16_t screen;
 extern char buf[64];
-extern char buf[64];
-extern uint16_t x;
-extern uint16_t y;
 
-extern uint16_t score_nr1;							//количество очков команды 1
-extern uint16_t score_nr2;							//количество очков команды 2
-extern uint16_t score_nr3;							//количество очков команды 3
-extern uint16_t score_nr4;							//количество очков команды 4
-extern uint16_t score_nr5;							//количество очков команды 5
-extern uint16_t score_nr6;							//количество очков команды 6
-extern uint16_t score_nr7;							//количество очков команды 7
-extern uint16_t score_nr8;							//количество очков команды 8
+extern uint16_t scores[8];							//количество очков команд [0-7]
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
 extern volatile uint8_t update_flag;		//старт/стоп таймера
 extern uint16_t amount;									//номер команды
 extern uint16_t tf;											//положительный или отрицательный ответ
+
+static const char* const amount_digits[] = {
+    "2", "3", "4", "5", "6", "7", "8"
+};
 
 extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
@@ -102,197 +97,46 @@ uint8_t Button_Read_right(void)
 	return 0;
 }
 //=======Обработчик кнопок передатчиков===============
+static const char* const team_names[] = {
+	"team nr-1", "team nr-2", "team nr-3", "team nr-4",
+	"team nr-5", "team nr-6", "team nr-7", "team nr-8"
+};
+static const uint16_t team_y_pos[] = {50, 70, 90, 110, 130, 150, 170, 190};
+
 void Button_transmiter(void)
 {
 	uint8_t status;
-	  	status = NRF24_ReadReg(STATUS);
-	  	if(status & 0x40 && screen==1)
-	  	{
-	    	rx_data = NRF24L01_Receive();
-	    	//>>>>>>>>>> Передатчик 1
-	    	if(rx_data == 0x01)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x01;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 50, "team nr-1", Font_11x18, YELLOW, MYFON);				//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x01;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 50, "team nr-1", Font_11x18, YELLOW, MYFON);				//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x01;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 50, "team nr-1", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 52, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 2
-	    	if(rx_data == 0x02)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x02;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 70, "team nr-2", Font_11x18, YELLOW, MYFON);				//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x02;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 70, "team nr-2", Font_11x18, YELLOW, MYFON);				//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x02;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 70, "team nr-2", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 72, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 3
-	    	if(rx_data == 0x03)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x03;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 90, "team nr-3", Font_11x18, YELLOW, MYFON);				//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x03;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 90, "team nr-3", Font_11x18, YELLOW, MYFON);				//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x03;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 90, "team nr-3", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 92, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 4
-	    	if(rx_data == 0x04)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x04;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 110, "team nr-4", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x04;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 110, "team nr-4", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x04;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 110, "team nr-4", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 112, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 5
-	    	if(rx_data == 0x05)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x05;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 130, "team nr-5", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x05;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 130, "team nr-5", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x05;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 130, "team nr-5", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 132, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 6
-	    	if(rx_data == 0x06)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x06;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 150, "team nr-6", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x06;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 150, "team nr-6", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x06;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 150, "team nr-6", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 152, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 7
-	    	if(rx_data == 0x07)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x07;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 170, "team nr-7", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x07;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 170, "team nr-7", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x07;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 170, "team nr-7", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 172, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	//>>>>>>>>>> Передатчик 8
-	    	if(rx_data == 0x08)
-	    	{
-	    		if(on_off==1)//>>>>>>>>>>Фальшстарт отключен
-	    				{
-								key_nr=0x08;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 190, "team nr-8", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==1)//>>>>>>>>>>Без фальшстарта
-	    				{
-								key_nr=0x08;					//номер нажатой кнопки команды
-								LED_ON;
-								ILI9341_WriteString(7, 190, "team nr-8", Font_11x18, YELLOW, MYFON);			//Цвет отвечающей команды
-	    				}
-	    				else if(on_off==0 && timer_running==0)//>>>>>>>>>>Фальшстарт
-	    				{
-								key_nr=0x08;					//номер нажатой кнопки команды
-								ILI9341_WriteString(7, 190, "team nr-8", Font_11x18, BLACK, MYFON);				//Цвет отвечающей команды
-								ILI9341_WriteString(175, 192, "!", Font_11x18, RED, MYFON);								//Цвет отвечающей команды
-	    				}
-	    	}
-	    	if(on_off==0 && timer_running==0)
-	    	{
-	    	ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);										//Сброс тай мера при фальшстарте
-	    	ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);										//Цвет текста "reset falshstart"
-	    	ILI9341_WriteString(230, 105, "TAIMER", Font_7x10, BLACK, WHITE);									//Цвет текста "reset falshstart"
-	    	}
-	    	HAL_TIM_Base_Stop_IT(&htim2);	//Останавливаем таймер
-	  	}
+	status = NRF24_ReadReg(STATUS);
+	if(status & 0x40 && screen == 1)
+	{
+		rx_data = NRF24L01_Receive();
+		if(rx_data >= 0x01 && rx_data <= 0x08)
+		{
+			uint8_t team_idx = rx_data - 1;
+			uint8_t is_false_start = (on_off == 0 && timer_running == 0);
+
+			key_nr = rx_data;
+
+			if(is_false_start)
+			{
+				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
+				ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
+			}
+			else
+			{
+				LED_ON;
+				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
+			}
+
+			if(is_false_start)
+			{
+				ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
+				ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
+				ILI9341_WriteString(230, 105, "TAIMER", Font_7x10, BLACK, WHITE);
+			}
+		}
+		HAL_TIM_Base_Stop_IT(&htim2);
+	}
 }
 void definition_of_coordinates(void)
 	{
@@ -315,15 +159,8 @@ void definition_of_coordinates(void)
 	case 0:
 	  if(x > 20 && x < 150 && y > 60 && y < 120) //если нажали брейн-ринг
 	  {
-	  	//>>>>>>>>>>Сбрасываем очки у всех команд
-	  	score_nr1=0;							//количество очков команды 1
-	  	score_nr2=0;							//количество очков команды 2
-	  	score_nr3=0;							//количество очков команды 3
-	  	score_nr4=0;							//количество очков команды 4
-	  	score_nr5=0;							//количество очков команды 5
-	  	score_nr6=0;							//количество очков команды 6
-	  	score_nr7=0;							//количество очков команды 7
-	  	score_nr8=0;							//количество очков команды 8
+  	//>>>>>>>>>>Сбрасываем очки у всех команд
+  	for(uint8_t i = 0; i < 8; i++) scores[i] = 0;
 
 
 	  	//>>>>>>>>>>обработка состояния таймера
@@ -343,13 +180,11 @@ void definition_of_coordinates(void)
 	  {
 		screen_setting ();
 		//>>>>>>>>>>Блок сохранения количесва команд в игре
-		if(amount==2){ILI9341_WriteString(130, 110, "2", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		else if(amount==3){ILI9341_WriteString(130, 110, "3", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		else if(amount==4){ILI9341_WriteString(130, 110, "4", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		else if(amount==5){ILI9341_WriteString(130, 110, "5", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		else if(amount==6){ILI9341_WriteString(130, 110, "6", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		else if(amount==7){ILI9341_WriteString(130, 110, "7", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		else if(amount==8){ILI9341_WriteString(130, 110, "8", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
+		if(amount >= 2 && amount <= 8)
+		{
+			ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			HAL_Delay(500);
+		}
 		//>>>>>>>>>>Настройки фальшстарта
 		if(on_off==0)
 		{
@@ -407,24 +242,20 @@ void definition_of_coordinates(void)
 	  else if(x > 30 && x < 68 && y > 142 && y < 175)//Если добавляем комманды "-"
 	  {
 		  amount--;
-		  if(amount==2){ILI9341_WriteString(130, 110, "2", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==3){ILI9341_WriteString(130, 110, "3", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==4){ILI9341_WriteString(130, 110, "4", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==5){ILI9341_WriteString(130, 110, "5", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==6){ILI9341_WriteString(130, 110, "6", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==7){ILI9341_WriteString(130, 110, "7", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==8){ILI9341_WriteString(130, 110, "8", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
+		  if(amount >= 2 && amount <= 8)
+		  {
+			  ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			  HAL_Delay(500);
+		  }
 	  }
 	  else if(x > 90 && x < 128 && y > 142 && y < 175)//Если удаляем комманды "+"
 	  {
 		  amount++;
-		  if(amount==2){ILI9341_WriteString(130, 110, "2", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==3){ILI9341_WriteString(130, 110, "3", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==4){ILI9341_WriteString(130, 110, "4", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==5){ILI9341_WriteString(130, 110, "5", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==6){ILI9341_WriteString(130, 110, "6", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==7){ILI9341_WriteString(130, 110, "7", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
-		  else if(amount==8){ILI9341_WriteString(130, 110, "8", Font_16x26, WHITE, BLACK);HAL_Delay(500);}
+		  if(amount >= 2 && amount <= 8)
+		  {
+			  ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			  HAL_Delay(500);
+		  }
 	  }
 	  else if(x > 30 && x < 140 && y > 190 && y < 220)//обработчик кнопки "save"
 	  {
