@@ -68,7 +68,7 @@ uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
 char lcd_buf[16];									//буфер значения таймера
 uint16_t teams=2;								//номер команды
-uint16_t key_nr=0;								//номер нажатой кнопки команды
+uint16_t pressed_btn_team=0;								//номер нажатой кнопки команды
 uint16_t scores[8] = {0};						//количество очков команд [0-7]
 uint16_t tf=0;										//положительный или отрицательный ответ
 uint8_t rx_data;									//номер нажатой кнопки передатчика
@@ -186,7 +186,7 @@ int main(void)
 				timer_running = 0;
 				g_timer_seconds = 60; 											//Устанавливаем начальное время
 				reset_timer = 1;										//Сброс таймера
-				key_nr=rx_data;											//Фиксируем номер команды нажавшая кнопку
+				pressed_btn_team=rx_data;											//Фиксируем номер команды нажавшая кнопку
 				tf=1;																//Положительный или отрицательный ответ
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 				reset_color();											//установка цвета комманд для сделующего вопроса.
@@ -199,7 +199,7 @@ int main(void)
 			if(Button_Read_right() && screen==1 && timer_running==1)
 			{
 				timer_running = 0;
-				key_nr=rx_data;
+				pressed_btn_team=rx_data;
 				tf=0;
 				g_timer_seconds = 20; 											//Устанавливаем начальное время
 				reset_timer = 1;										//Сброс таймера

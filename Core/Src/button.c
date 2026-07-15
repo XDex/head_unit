@@ -16,7 +16,7 @@
 
 extern uint8_t rx_data;
 extern uint8_t falstart_enabled;
-extern uint16_t key_nr;
+extern uint16_t pressed_btn_team;
 extern uint8_t timer_running;
 extern uint8_t flag_press;
 extern uint32_t time_press;
@@ -115,7 +115,7 @@ void Button_transmiter(void)
 			uint8_t team_idx = rx_data - 1;
 			uint8_t is_false_start = (falstart_enabled && timer_running == 0);
 
-			key_nr = rx_data;
+			pressed_btn_team = rx_data;
 
 			if(is_false_start)
 			{

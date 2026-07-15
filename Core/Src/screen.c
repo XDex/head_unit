@@ -14,7 +14,7 @@
 
 extern uint16_t screen;
 extern uint16_t teams;
-extern uint16_t key_nr;
+extern uint16_t pressed_btn_team;
 extern uint16_t scores[8];
 extern uint16_t tf;
 char scope_buf[16];
@@ -176,8 +176,8 @@ void screen_setting(void)
 //>>>>>>>>>>функция окрашивает в разные цвета команду которая нажала кнопку
 void button_event_handler(void)
 {
-    if (key_nr < 1 || key_nr > MAX_TEAMS) return;
-    uint8_t idx = key_nr - 1;
+    if (pressed_btn_team < 1 || pressed_btn_team > MAX_TEAMS) return;
+    uint8_t idx = pressed_btn_team - 1;
 
     uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
     ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, WHITE, MYFON);
@@ -193,8 +193,8 @@ void button_event_handler(void)
 //>>>>>>>>>>функция окрашивает все надписи комманд в цвет по умолчанию
 void base_setting_color(void)
 {
-    if (key_nr < 1 || key_nr > MAX_TEAMS) return;
-    uint8_t idx = key_nr - 1;
+    if (pressed_btn_team < 1 || pressed_btn_team > MAX_TEAMS) return;
+    uint8_t idx = pressed_btn_team - 1;
     draw_team_name(idx, WHITE);
 }
 
