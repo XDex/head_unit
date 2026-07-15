@@ -18,6 +18,6 @@ extern SPI_HandleTypeDef hspi2;
 uint8_t ILI9341_TouchGetCoordinates(uint16_t *x, uint16_t *y);
 void editing_result(void);
 void editing_result_key(void);
-void reset_timer(void);
+void do_reset_timer(void);
 
 #endif

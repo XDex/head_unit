@@ -28,7 +28,7 @@ extern char buf[64];
 extern uint16_t scores[8];							//количество очков команд [0-7]
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
-extern volatile uint8_t update_flag;		//старт/стоп таймера
+extern volatile uint8_t reset_timer;		//старт/стоп таймера
 extern uint16_t amount;									//номер команды
 extern uint16_t tf;											//положительный или отрицательный ответ
 
@@ -165,7 +165,7 @@ void definition_of_coordinates(void)
 
 	  	//>>>>>>>>>>обработка состояния таймера
 	  	g_timer_seconds = 60; 								//Устанавливаем начальное время
-	  	update_flag = 1;							//Сброс таймера
+	  	reset_timer = 1;							//Сброс таймера
 	  	timer_running = 0;						//флаг остановки таймера
 	  	HAL_TIM_Base_Stop_IT(&htim2);	//Останавливаем таймер
 		  screen_Brain_Ring();					//переходим в экран игры "Брэйринг"
@@ -204,7 +204,7 @@ void definition_of_coordinates(void)
 		editing_result();//редактирование результата
 		if(falstart_enabled)
 			{
-			reset_timer();//выключение кнопки "reset timer"
+			do_reset_timer();//выключение кнопки "reset timer"
 			}
 	  if(x > 300 && x < 320 && y > 0 && y < 20)//если нажали крестик
 	  {

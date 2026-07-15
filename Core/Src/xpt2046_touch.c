@@ -63,7 +63,7 @@ extern char scope_buf[6];
 
 extern uint8_t timer_running;
 extern volatile int g_timer_seconds;
-extern volatile uint8_t update_flag;
+extern volatile uint8_t reset_timer;
 
 static inline void uint16_to_str(uint16_t val, char* buf, uint8_t maxlen)
 {
@@ -164,13 +164,13 @@ void editing_result_key(void)
     }
 }
 
-void reset_timer(void)
+void do_reset_timer(void)
 {
     if(x > 220 && x < 280 && y > 80 && y < 120)
     {
         ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, MYFON);
         g_timer_seconds = 60;
-        update_flag = 1;
+        reset_timer = 1;
         timer_running = 0;
         HAL_TIM_Base_Stop_IT(&htim2);
     }

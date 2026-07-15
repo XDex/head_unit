@@ -62,9 +62,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 char str1[64]={0};
-uint8_t buf1[20]={0};
 volatile int g_timer_seconds = 60;				//Начальное значение таймера
-volatile uint8_t update_flag = 0;	//старт/стоп таймера
+volatile uint8_t reset_timer = 0;	//старт/стоп таймера
 uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
 char lcd_buf[16];									//буфер значения таймера
@@ -181,12 +180,12 @@ int main(void)
 	  else
 	  {
 
-			if(Button_Read_left() && screen==1 && timer_running ==1)
+			if(Button_Read_left() && screen==1 && timer_running==1)
 			{
 				//обработка состояния таймера
 				timer_running = 0;
 				g_timer_seconds = 60; 											//Устанавливаем начальное время
-				update_flag = 1;										//Сброс таймера
+				reset_timer = 1;										//Сброс таймера
 				key_nr=rx_data;											//Фиксируем номер команды нажавшая кнопку
 				tf=1;																//Положительный или отрицательный ответ
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
@@ -197,13 +196,13 @@ int main(void)
 					{
 						//Код для экрана "эрудит"
 					}
-			if(Button_Read_right() && screen==1 && timer_running ==1)
+			if(Button_Read_right() && screen==1 && timer_running==1)
 			{
 				timer_running = 0;
 				key_nr=rx_data;
 				tf=0;
 				g_timer_seconds = 20; 											//Устанавливаем начальное время
-				update_flag = 1;										//Сброс таймера
+				reset_timer = 1;										//Сброс таймера
 				//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 			}
@@ -223,9 +222,9 @@ int main(void)
 	  }
 
 	  //================== RTC =========================
-if (update_flag)
+if (reset_timer)
 		{
-			update_flag = 0;
+			reset_timer = 0;
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
 			if(screen==1)
 			{
@@ -721,7 +720,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             	g_timer_seconds--;
             }
         }
-        update_flag = 1;
+        reset_timer = 1;
     }
 }
 /* USER CODE END 4 */
