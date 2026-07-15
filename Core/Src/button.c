@@ -103,7 +103,7 @@ static const char* const team_names[] = {
 };
 static const uint16_t team_y_pos[] = {50, 70, 90, 110, 130, 150, 170, 190};
 
-void Button_transmiter(void)
+void Button_Press_handler(void)
 {
 	uint8_t status;
 	status = NRF24_ReadReg(STATUS);
@@ -138,7 +138,7 @@ void Button_transmiter(void)
 		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }
-void definition_of_coordinates(void)
+void Touchscreen_handler(void)
 	{
 	if(HAL_GPIO_ReadPin(GPIOB, T_IRQ_Pin) == GPIO_PIN_RESET && flag_press) //если нажат тачскрин
 	{
