@@ -16,7 +16,7 @@ extern uint16_t screen;
 extern uint16_t teams;
 extern uint16_t pressed_btn_team;
 extern uint16_t scores[8];
-extern uint16_t tf;
+extern uint16_t answer;
 char scope_buf[16];
 
 #define TEAM_LABEL_X      7
@@ -182,9 +182,9 @@ void button_event_handler(void)
     uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
     ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, WHITE, MYFON);
 
-    draw_team_name(idx, (tf == 0) ? BLACK : WHITE);
+    draw_team_name(idx, (answer == 0) ? BLACK : WHITE);
 
-    if (tf == 1)
+    if (answer == 1)
     {
         scores[idx]++;
     }

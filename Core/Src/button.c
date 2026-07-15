@@ -30,7 +30,7 @@ extern uint16_t scores[8];							//количество очков команд 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
 extern volatile uint8_t reset_timer;		//старт/стоп таймера
 extern uint16_t teams;									//номер команды
-extern uint16_t tf;											//положительный или отрицательный ответ
+extern uint16_t answer;											//положительный или отрицательный ответ
 
 static const char* const team_digits[] = {
     "2", "3", "4", "5", "6", "7", "8"
