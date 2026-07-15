@@ -29,10 +29,10 @@ extern uint16_t scores[8];							//количество очков команд 
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
 extern volatile uint8_t reset_timer;		//старт/стоп таймера
-extern uint16_t amount;									//номер команды
+extern uint16_t teams;									//номер команды
 extern uint16_t tf;											//положительный или отрицательный ответ
 
-static const char* const amount_digits[] = {
+static const char* const team_digits[] = {
     "2", "3", "4", "5", "6", "7", "8"
 };
 
@@ -180,9 +180,9 @@ void definition_of_coordinates(void)
 	  {
 		screen_setting ();
 		//>>>>>>>>>>Блок сохранения количесва команд в игре
-		if(amount >= 2 && amount <= 8)
+		if(teams >= 2 && teams <= 8)
 		{
-			ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 			HAL_Delay(500);
 		}
 		//>>>>>>>>>>Настройки фальшстарта
@@ -241,19 +241,19 @@ void definition_of_coordinates(void)
 	  }
 	  else if(x > 30 && x < 68 && y > 142 && y < 175)//Если добавляем комманды "-"
 	  {
-		  amount--;
-		  if(amount >= 2 && amount <= 8)
+		  teams--;
+		  if(teams >= 2 && teams <= 8)
 		  {
-			  ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			  ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 			  HAL_Delay(500);
 		  }
 	  }
 	  else if(x > 90 && x < 128 && y > 142 && y < 175)//Если удаляем комманды "+"
 	  {
-		  amount++;
-		  if(amount >= 2 && amount <= 8)
+		  teams++;
+		  if(teams >= 2 && teams <= 8)
 		  {
-			  ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			  ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 			  HAL_Delay(500);
 		  }
 	  }

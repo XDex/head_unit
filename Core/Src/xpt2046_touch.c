@@ -58,7 +58,7 @@ extern uint16_t screen;
 extern uint16_t x;
 extern uint16_t y;
 extern uint8_t flag_press;
-extern uint16_t amount;
+extern uint16_t teams;
 extern char scope_buf[6];
 
 extern uint8_t timer_running;
@@ -160,7 +160,7 @@ void editing_result_key(void)
         ILI9341_WriteString(142, BUTTON_Y, "start", Font_7x10, BLUE, WHITE);
         ILI9341_WriteString(272, BUTTON_Y, "no", Font_7x10, BLUE, WHITE);
         ed_result = 0;
-        render_scores(amount);
+        render_scores(teams);
     }
 }
 

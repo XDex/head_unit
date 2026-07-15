@@ -13,7 +13,7 @@
 #include "fonts.h"
 
 extern uint16_t screen;
-extern uint16_t amount;
+extern uint16_t teams;
 extern uint16_t key_nr;
 extern uint16_t scores[8];
 extern uint16_t tf;
@@ -79,7 +79,7 @@ void reset_color(void)
 {
     for (uint8_t i = 0; i < MAX_TEAMS; i++)
     {
-        uint16_t color = (i < amount) ? WHITE : BLACK;
+        uint16_t color = (i < teams) ? WHITE : BLACK;
         draw_team_name(i, color);
     }
 }
@@ -119,7 +119,7 @@ void screen_Brain_Ring(void)
 
     for (uint8_t i = 0; i < MAX_TEAMS; i++)
     {
-        uint16_t color = (i < amount) ? WHITE : BLACK;
+        uint16_t color = (i < teams) ? WHITE : BLACK;
         draw_team_name(i, color);
         draw_team_zero(color);
     }
@@ -156,11 +156,11 @@ void screen_setting(void)
     ILI9341_Random_line(302, 4, 315, 16, WHITE);
     ILI9341_Random_line(302, 16, 315, 4, WHITE);
     //===========Блок настройки фальшстарт=================================
-    ILI9341_WriteString(15, 60, "False Start", Font_11x18, BLUE, RED);
+    ILI9341_WriteString(15, 60, "False start", Font_11x18, BLUE, RED);
     //===========Блок настроек колличества команд=================================
     ILI9341_Draw_Horizontal_Line(10, 100, 150, WHITE);
-    ILI9341_WriteString(15, 103, "amount of", Font_11x18, BLUE, RED);
-    ILI9341_WriteString(15, 118, "commands", Font_11x18, BLUE, RED);
+    ILI9341_WriteString(15, 103, "Number of", Font_11x18, BLUE, RED);
+    ILI9341_WriteString(15, 118, "teams", Font_11x18, BLUE, RED);
     ILI9341_Draw_Filled_Rectangle_Coord(156, 104, 122, 138, BLACK);
     ILI9341_Draw_Filled_Rectangle_Coord(30, 142, 68, 175, BLACK);
     ILI9341_Draw_Filled_Rectangle_Coord(90, 142, 128, 175, BLACK);
