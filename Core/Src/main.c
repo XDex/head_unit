@@ -62,25 +62,24 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 char str1[64]={0};
-uint8_t buf1[20]={0};
 volatile int g_timer_seconds = 60;				//Начальное значение таймера
-volatile uint8_t update_flag = 0;	//старт/стоп таймера
+volatile uint8_t reset_timer = 0;	//старт/стоп таймера
 uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
 char lcd_buf[16];									//буфер значения таймера
-uint16_t amount=2;								//номер команды
-uint16_t key_nr=0;								//номер нажатой кнопки команды
+uint16_t teams=2;								//номер команды
+uint16_t pressed_btn_team=0;								//номер нажатой кнопки команды
 uint16_t scores[8] = {0};						//количество очков команд [0-7]
-uint16_t tf=0;										//положительный или отрицательный ответ
+uint16_t answer=0;										//положительный или отрицательный ответ
 uint8_t rx_data;									//номер нажатой кнопки передатчика
-uint16_t on_off=0;
+uint16_t falstart_enabled=0;
 uint8_t flag_press = 1;
 uint32_t time_press = 0;
 char buf[64] = {0,};
 uint16_t x = 0;
 uint16_t y = 0;
 uint16_t screen=0;
-uint16_t ed_result=0;							//Признак редактирования счёта...
+uint16_t edit_score=0;							//Признак редактирования счёта...
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -111,7 +110,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	ed_result=0;
+	edit_score=0;
 
   /* USER CODE END 1 */
 
@@ -170,25 +169,25 @@ int main(void)
   		reset_color();																									//установка цвета комманд для сделующего вопроса.
   		reset_falsstart();																							//сброс фальшстарта
   	}
-  	Button_transmiter(); 										//Обработчик сигналов с кнопок передатчиков
-	  definition_of_coordinates();						//Обработчик тачскрина
+  	Button_Press_handler(); 										//Обработчик сигналов с кнопок передатчиков
+	  Touchscreen_handler();						//Обработчик тачскрина
 
 	  //>>>>>>>>>>Обработчик нажатия кнопок. Для каждого экрана своя логика
-	  if(ed_result!=0)												//Если 0 тогда обрабатываем кнопки если иначе - пропускаем все кнопки
+	  if(edit_score!=0)												//Если 0 тогда обрабатываем кнопки если иначе - пропускаем все кнопки
 	  {
-	  	editing_result_key();									//редактирование результата
+	  	score_editing_handler();									//редактирование результата
 	  }
 	  else
 	  {
 
-			if(Button_Read_left() && screen==1 && timer_running ==1)
+			if(Button_Read_left() && screen==1 && timer_running==1)
 			{
 				//обработка состояния таймера
 				timer_running = 0;
 				g_timer_seconds = 60; 											//Устанавливаем начальное время
-				update_flag = 1;										//Сброс таймера
-				key_nr=rx_data;											//Фиксируем номер команды нажавшая кнопку
-				tf=1;																//Положительный или отрицательный ответ
+				reset_timer = 1;										//Сброс таймера
+				pressed_btn_team=rx_data;											//Фиксируем номер команды нажавшая кнопку
+				answer=1;																//Положительный или отрицательный ответ
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 				reset_color();											//установка цвета комманд для сделующего вопроса.
 				reset_falsstart();
@@ -197,13 +196,13 @@ int main(void)
 					{
 						//Код для экрана "эрудит"
 					}
-			if(Button_Read_right() && screen==1 && timer_running ==1)
+			if(Button_Read_right() && screen==1 && timer_running==1)
 			{
 				timer_running = 0;
-				key_nr=rx_data;
-				tf=0;
+				pressed_btn_team=rx_data;
+				answer=0;
 				g_timer_seconds = 20; 											//Устанавливаем начальное время
-				update_flag = 1;										//Сброс таймера
+				reset_timer = 1;										//Сброс таймера
 				//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 			}
@@ -223,9 +222,9 @@ int main(void)
 	  }
 
 	  //================== RTC =========================
-if (update_flag)
+if (reset_timer)
 		{
-			update_flag = 0;
+			reset_timer = 0;
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
 			if(screen==1)
 			{
@@ -721,7 +720,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             	g_timer_seconds--;
             }
         }
-        update_flag = 1;
+        reset_timer = 1;
     }
 }
 /* USER CODE END 4 */

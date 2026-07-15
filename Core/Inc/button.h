@@ -17,8 +17,8 @@
 uint8_t Button_Read_left(void);
 uint8_t Button_Read_centr(void);
 uint8_t Button_Read_right(void);
-void Button_transmiter(void);
-void definition_of_coordinates(void);
+void Button_Press_handler(void);
+void Touchscreen_handler(void);
 
 
 #endif /* INC_BUTTON_H_ */

@@ -15,8 +15,8 @@
 #include <string.h>
 
 extern uint8_t rx_data;
-extern uint8_t on_off;
-extern uint16_t key_nr;
+extern uint8_t falstart_enabled;
+extern uint16_t pressed_btn_team;
 extern uint8_t timer_running;
 extern uint8_t flag_press;
 extern uint32_t time_press;
@@ -28,11 +28,11 @@ extern char buf[64];
 extern uint16_t scores[8];							//количество очков команд [0-7]
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
-extern volatile uint8_t update_flag;		//старт/стоп таймера
-extern uint16_t amount;									//номер команды
-extern uint16_t tf;											//положительный или отрицательный ответ
+extern volatile uint8_t reset_timer;		//старт/стоп таймера
+extern uint16_t teams;									//номер команды
+extern uint16_t answer;											//положительный или отрицательный ответ
 
-static const char* const amount_digits[] = {
+static const char* const team_digits[] = {
     "2", "3", "4", "5", "6", "7", "8"
 };
 
@@ -103,7 +103,7 @@ static const char* const team_names[] = {
 };
 static const uint16_t team_y_pos[] = {50, 70, 90, 110, 130, 150, 170, 190};
 
-void Button_transmiter(void)
+void Button_Press_handler(void)
 {
 	uint8_t status;
 	status = NRF24_ReadReg(STATUS);
@@ -113,9 +113,9 @@ void Button_transmiter(void)
 		if(rx_data >= 0x01 && rx_data <= 0x08)
 		{
 			uint8_t team_idx = rx_data - 1;
-			uint8_t is_false_start = (on_off == 0 && timer_running == 0);
+			uint8_t is_false_start = (falstart_enabled && timer_running == 0);
 
-			key_nr = rx_data;
+			pressed_btn_team = rx_data;
 
 			if(is_false_start)
 			{
@@ -132,13 +132,13 @@ void Button_transmiter(void)
 			{
 				ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
 				ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
-				ILI9341_WriteString(230, 105, "TAIMER", Font_7x10, BLACK, WHITE);
+				ILI9341_WriteString(230, 105, "TIMER", Font_7x10, BLACK, WHITE);
 			}
 		}
 		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }
-void definition_of_coordinates(void)
+void Touchscreen_handler(void)
 	{
 	if(HAL_GPIO_ReadPin(GPIOB, T_IRQ_Pin) == GPIO_PIN_RESET && flag_press) //если нажат тачскрин
 	{
@@ -165,7 +165,7 @@ void definition_of_coordinates(void)
 
 	  	//>>>>>>>>>>обработка состояния таймера
 	  	g_timer_seconds = 60; 								//Устанавливаем начальное время
-	  	update_flag = 1;							//Сброс таймера
+	  	reset_timer = 1;							//Сброс таймера
 	  	timer_running = 0;						//флаг остановки таймера
 	  	HAL_TIM_Base_Stop_IT(&htim2);	//Останавливаем таймер
 		  screen_Brain_Ring();					//переходим в экран игры "Брэйринг"
@@ -180,18 +180,18 @@ void definition_of_coordinates(void)
 	  {
 		screen_setting ();
 		//>>>>>>>>>>Блок сохранения количесва команд в игре
-		if(amount >= 2 && amount <= 8)
+		if(teams >= 2 && teams <= 8)
 		{
-			ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 			HAL_Delay(500);
 		}
 		//>>>>>>>>>>Настройки фальшстарта
-		if(on_off==0)
+		if(falstart_enabled)
 		{
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 		}
-		else if(on_off==1)
+		else
 		{
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
@@ -201,10 +201,10 @@ void definition_of_coordinates(void)
 	break;
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	case 1:
-		editing_result();//редактирование результата
-		if(on_off==0)
+		enable_score_editing();//редактирование результата
+		if(falstart_enabled)
 			{
-			reset_timer();//выключение кнопки "reset taimer"
+			do_reset_timer();//выключение кнопки "reset timer"
 			}
 	  if(x > 300 && x < 320 && y > 0 && y < 20)//если нажали крестик
 	  {
@@ -229,31 +229,31 @@ void definition_of_coordinates(void)
 	  }
 	  else if(x > 40 && x < 60 && y > 80 && y < 100)//Фальшстарт ON
 	  {
-		  on_off=0;
+		  falstart_enabled=1;
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 	  }
 	  else if(x > 100 && x < 130 && y > 80 && y < 100)//Фальшстарт OFF
 	  {
-		  on_off=1;
+		  falstart_enabled=0;
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 	  }
 	  else if(x > 30 && x < 68 && y > 142 && y < 175)//Если добавляем комманды "-"
 	  {
-		  amount--;
-		  if(amount >= 2 && amount <= 8)
+		  teams--;
+		  if(teams >= 2 && teams <= 8)
 		  {
-			  ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			  ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 			  HAL_Delay(500);
 		  }
 	  }
 	  else if(x > 90 && x < 128 && y > 142 && y < 175)//Если удаляем комманды "+"
 	  {
-		  amount++;
-		  if(amount >= 2 && amount <= 8)
+		  teams++;
+		  if(teams >= 2 && teams <= 8)
 		  {
-			  ILI9341_WriteString(130, 110, amount_digits[amount - 2], Font_16x26, WHITE, BLACK);
+			  ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 			  HAL_Delay(500);
 		  }
 	  }

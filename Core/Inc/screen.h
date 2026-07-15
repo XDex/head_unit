@@ -3,7 +3,7 @@
 
 #include "ILI9341_GFX.h"
 
-void definition_of_coordinates();
+void Touchscreen_handler();
 void screen_menu ();
 void screen_Brain_Ring();
 void The_coordinate_grid ();

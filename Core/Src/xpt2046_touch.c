@@ -52,18 +52,18 @@ static const uint8_t cmd_read_x = 0x90;
 static const uint8_t cmd_read_y = 0xD0;
 static const uint8_t zeroes_tx[] = {0x00, 0x00};
 
-extern uint16_t ed_result;
+extern uint16_t edit_score;
 extern uint16_t scores[8];
 extern uint16_t screen;
 extern uint16_t x;
 extern uint16_t y;
 extern uint8_t flag_press;
-extern uint16_t amount;
+extern uint16_t teams;
 extern char scope_buf[6];
 
 extern uint8_t timer_running;
 extern volatile int g_timer_seconds;
-extern volatile uint8_t update_flag;
+extern volatile uint8_t reset_timer;
 
 static inline void uint16_to_str(uint16_t val, char* buf, uint8_t maxlen)
 {
@@ -116,7 +116,7 @@ static void draw_edit_buttons(void)
     ILI9341_WriteString(272, BUTTON_Y, "-", Font_7x10, BLUE, WHITE);
 }
 
-void editing_result(void)
+void enable_score_editing(void)
 {
     for (uint8_t i = 0; i < MAX_TEAMS; i++)
     {
@@ -124,7 +124,7 @@ void editing_result(void)
         uint16_t y_bot = y_top + EDIT_ZONE_ROW_STEP;
         if (x > EDIT_ZONE_X_MIN && x < EDIT_ZONE_X_MAX && y > y_top && y < y_bot)
         {
-            ed_result = i + 1;
+            edit_score = i + 1;
             uint16_to_str(scores[i], scope_buf, sizeof(scope_buf));
             ILI9341_WriteString(135, y_top, scope_buf, Font_11x18, ORANGE, MYFON);
             draw_edit_buttons();
@@ -133,10 +133,10 @@ void editing_result(void)
     }
 }
 
-void editing_result_key(void)
+void score_editing_handler(void)
 {
-    if (ed_result < 1 || ed_result > MAX_TEAMS) return;
-    uint8_t idx = ed_result - 1;
+    if (edit_score < 1 || edit_score > MAX_TEAMS) return;
+    uint8_t idx = edit_score - 1;
     uint16_t y_pos = EDIT_ZONE_START_Y + idx * EDIT_ZONE_ROW_STEP;
 
     if (Button_Read_left())
@@ -153,24 +153,24 @@ void editing_result_key(void)
         ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
     }
 
-    if (Button_Read_centr() && ed_result != 0)
+    if (Button_Read_centr() && edit_score != 0)
     {
         draw_edit_buttons();
         ILI9341_WriteString(30, BUTTON_Y, "yes", Font_7x10, BLUE, WHITE);
         ILI9341_WriteString(142, BUTTON_Y, "start", Font_7x10, BLUE, WHITE);
         ILI9341_WriteString(272, BUTTON_Y, "no", Font_7x10, BLUE, WHITE);
-        ed_result = 0;
-        render_scores(amount);
+        edit_score = 0;
+        render_scores(teams);
     }
 }
 
-void reset_timer(void)
+void do_reset_timer(void)
 {
     if(x > 220 && x < 280 && y > 80 && y < 120)
     {
         ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, MYFON);
         g_timer_seconds = 60;
-        update_flag = 1;
+        reset_timer = 1;
         timer_running = 0;
         HAL_TIM_Base_Stop_IT(&htim2);
     }
