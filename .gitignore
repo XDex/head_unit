@@ -1,0 +1,27 @@
+# Toolchain / Build outputs
+Debug/
+Release/
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.su
+*.d
+
+# STM32CubeMX generated temporary files
+.mxproject
+*.bak
+
+# IDE specific user settings (Local layout, history, and logs)
+.settings/
+.analytics
+.config/
+
+# Core project definition files (DO NOT IGNORE THESE)
+# Keep these unignored so your project can be imported by others:
+# !.project
+# !.cproject
+# !*.ioc
+
+datasheet
