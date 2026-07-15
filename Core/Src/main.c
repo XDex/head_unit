@@ -79,7 +79,7 @@ char buf[64] = {0,};
 uint16_t x = 0;
 uint16_t y = 0;
 uint16_t screen=0;
-uint16_t ed_result=0;							//Признак редактирования счёта...
+uint16_t edit_score=0;							//Признак редактирования счёта...
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -110,7 +110,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	ed_result=0;
+	edit_score=0;
 
   /* USER CODE END 1 */
 
@@ -173,9 +173,9 @@ int main(void)
 	  Touchscreen_handler();						//Обработчик тачскрина
 
 	  //>>>>>>>>>>Обработчик нажатия кнопок. Для каждого экрана своя логика
-	  if(ed_result!=0)												//Если 0 тогда обрабатываем кнопки если иначе - пропускаем все кнопки
+	  if(edit_score!=0)												//Если 0 тогда обрабатываем кнопки если иначе - пропускаем все кнопки
 	  {
-	  	editing_result_key();									//редактирование результата
+	  	score_editing_handler();									//редактирование результата
 	  }
 	  else
 	  {

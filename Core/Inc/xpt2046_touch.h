@@ -16,8 +16,8 @@ extern SPI_HandleTypeDef hspi2;
 #define TOUCH_CS_UNSELECT    HAL_GPIO_WritePin(GPIOB, T_CS_Pin, GPIO_PIN_SET)
 
 uint8_t ILI9341_TouchGetCoordinates(uint16_t *x, uint16_t *y);
-void editing_result(void);
-void editing_result_key(void);
+void enable_score_editing(void);
+void score_editing_handler(void);
 void do_reset_timer(void);
 
 #endif

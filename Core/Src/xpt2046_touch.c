@@ -52,7 +52,7 @@ static const uint8_t cmd_read_x = 0x90;
 static const uint8_t cmd_read_y = 0xD0;
 static const uint8_t zeroes_tx[] = {0x00, 0x00};
 
-extern uint16_t ed_result;
+extern uint16_t edit_score;
 extern uint16_t scores[8];
 extern uint16_t screen;
 extern uint16_t x;
@@ -116,7 +116,7 @@ static void draw_edit_buttons(void)
     ILI9341_WriteString(272, BUTTON_Y, "-", Font_7x10, BLUE, WHITE);
 }
 
-void editing_result(void)
+void enable_score_editing(void)
 {
     for (uint8_t i = 0; i < MAX_TEAMS; i++)
     {
@@ -124,7 +124,7 @@ void editing_result(void)
         uint16_t y_bot = y_top + EDIT_ZONE_ROW_STEP;
         if (x > EDIT_ZONE_X_MIN && x < EDIT_ZONE_X_MAX && y > y_top && y < y_bot)
         {
-            ed_result = i + 1;
+            edit_score = i + 1;
             uint16_to_str(scores[i], scope_buf, sizeof(scope_buf));
             ILI9341_WriteString(135, y_top, scope_buf, Font_11x18, ORANGE, MYFON);
             draw_edit_buttons();
@@ -133,10 +133,10 @@ void editing_result(void)
     }
 }
 
-void editing_result_key(void)
+void score_editing_handler(void)
 {
-    if (ed_result < 1 || ed_result > MAX_TEAMS) return;
-    uint8_t idx = ed_result - 1;
+    if (edit_score < 1 || edit_score > MAX_TEAMS) return;
+    uint8_t idx = edit_score - 1;
     uint16_t y_pos = EDIT_ZONE_START_Y + idx * EDIT_ZONE_ROW_STEP;
 
     if (Button_Read_left())
@@ -153,13 +153,13 @@ void editing_result_key(void)
         ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
     }
 
-    if (Button_Read_centr() && ed_result != 0)
+    if (Button_Read_centr() && edit_score != 0)
     {
         draw_edit_buttons();
         ILI9341_WriteString(30, BUTTON_Y, "yes", Font_7x10, BLUE, WHITE);
         ILI9341_WriteString(142, BUTTON_Y, "start", Font_7x10, BLUE, WHITE);
         ILI9341_WriteString(272, BUTTON_Y, "no", Font_7x10, BLUE, WHITE);
-        ed_result = 0;
+        edit_score = 0;
         render_scores(teams);
     }
 }
