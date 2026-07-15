@@ -14,6 +14,7 @@ void button_event_handler();
 void base_setting_color();
 void reset_color ();
 void reset_falsstart(void);
+void render_scores(uint16_t active_teams);
 void sub_window_scope (void);
 
 

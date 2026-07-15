@@ -7,76 +7,74 @@
 #define swap(a, b) { int16_t t = a; a = b; b = t; }
 
 volatile uint16_t LCD_HEIGHT = ILI9341_SCREEN_HEIGHT;
-volatile uint16_t LCD_WIDTH	 = ILI9341_SCREEN_WIDTH;
+volatile uint16_t LCD_WIDTH  = ILI9341_SCREEN_WIDTH;
 
-#define SIZE_RECIV 10000
-#define START_WRITE 1024
+// SPI helper - replaces duplicated CS/DC/SPI sequence
+static inline void _lcd_send_byte(uint8_t dc, uint8_t byte)
+{
+    if (dc) DISP_DC_DATA; else DISP_DC_CMD;
+    DISP_CS_SELECT;
+    DISP_SPI->DR = byte;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    while(DISP_SPI->SR & SPI_SR_BSY);
+    DISP_CS_UNSELECT;
+}
 
-volatile uint8_t spi1_tx_full_flag = 0;
-volatile uint8_t spi1_tx_half_flag = 0;
-
-volatile uint8_t spi2_rx_full_flag = 0;
-volatile uint8_t spi2_rx_half_flag = 0;
+#define LCD_SEND_CMD(cmd) _lcd_send_byte(0, cmd)
+#define LCD_SEND_DATA(d)  _lcd_send_byte(1, d)
 
 //>>>>>>>>>>Отправить команду (char) to LCD
 void ILI9341_Write_Command(uint8_t Command)
 {
-	DISP_DC_CMD;
-	DISP_CS_SELECT;
-	DISP_SPI->DR = Command;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_CS_UNSELECT;
+	LCD_SEND_CMD(Command);
 }
 
 //>>>>>>>>>>Отправка данных (char) to LCD
 void ILI9341_Write_Data(uint8_t Data)
 {
-	DISP_DC_DATA;
-	DISP_CS_SELECT;
-	DISP_SPI->DR = Data;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_CS_UNSELECT;
+	LCD_SEND_DATA(Data);
 }
 
 //>>>>>>>>>>Set Address - Location block - to draw into
 void ILI9341_Set_Address(uint16_t X1, uint16_t Y1, uint16_t X2, uint16_t Y2)
 {
-	DISP_DC_CMD;
-	DISP_CS_SELECT;
-	DISP_SPI->DR = 0x2A;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_DC_DATA;
-	DISP_SPI->DR = (uint8_t)(X1 >> 8);
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	DISP_SPI->DR = (uint8_t)X1;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	DISP_SPI->DR = (uint8_t)(X2 >> 8);
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	DISP_SPI->DR = (uint8_t)X2;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_DC_CMD;
-	DISP_SPI->DR = 0x2B;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_DC_DATA;
-	DISP_SPI->DR = (uint8_t)(Y1 >> 8);
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	DISP_SPI->DR = (uint8_t)Y1;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	DISP_SPI->DR = (uint8_t)(Y2 >> 8);
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	DISP_SPI->DR = (uint8_t)Y2;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_DC_CMD;
-	DISP_SPI->DR = 0x2C;
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
-	DISP_CS_UNSELECT;
+    DISP_DC_CMD; DISP_CS_SELECT;
+    DISP_SPI->DR = 0x2A;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    while(DISP_SPI->SR & SPI_SR_BSY);
+
+    DISP_DC_DATA;
+    DISP_SPI->DR = (uint8_t)(X1 >> 8);
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    DISP_SPI->DR = (uint8_t)X1;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    DISP_SPI->DR = (uint8_t)(X2 >> 8);
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    DISP_SPI->DR = (uint8_t)X2;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    while(DISP_SPI->SR & SPI_SR_BSY);
+
+    DISP_DC_CMD;
+    DISP_SPI->DR = 0x2B;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    while(DISP_SPI->SR & SPI_SR_BSY);
+
+    DISP_DC_DATA;
+    DISP_SPI->DR = (uint8_t)(Y1 >> 8);
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    DISP_SPI->DR = (uint8_t)Y1;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    DISP_SPI->DR = (uint8_t)(Y2 >> 8);
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    DISP_SPI->DR = (uint8_t)Y2;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    while(DISP_SPI->SR & SPI_SR_BSY);
+
+    DISP_DC_CMD;
+    DISP_SPI->DR = 0x2C;
+    while(!(DISP_SPI->SR & SPI_SR_TXE));
+    while(DISP_SPI->SR & SPI_SR_BSY);
+    DISP_CS_UNSELECT;
 }
 
 //>>>>>>>>>>HARDWARE RESET
@@ -92,37 +90,24 @@ void ILI9341_Reset(void)
 //>>>>>>>>>>Плавное вращение экрана - changes x0 and y0
 void ILI9341_Set_Rotation(uint8_t Rotation)
 {
-	DISP_DC_CMD;
-	DISP_CS_SELECT;
+	DISP_DC_CMD; DISP_CS_SELECT;
 	DISP_SPI->DR = 0x36;
 	while(!(DISP_SPI->SR & SPI_SR_TXE));
 	while(DISP_SPI->SR & SPI_SR_BSY);
 	DISP_CS_UNSELECT;
 
-	switch(Rotation)
+	static const struct { uint8_t data; uint16_t w; uint16_t h; } rot_table[] = {
+		{ 0x40 | 0x08, 240, 320 },  // SCREEN_VERTICAL_1
+		{ 0x20 | 0x08, 320, 240 },  // SCREEN_HORIZONTAL_1
+		{ 0x80 | 0x08, 240, 320 },  // SCREEN_VERTICAL_2
+		{ 0x40 | 0x80 | 0x20 | 0x08, 320, 240 }  // SCREEN_HORIZONTAL_2
+	};
+
+	if (Rotation < 4)
 	{
-		case SCREEN_VERTICAL_1:
-			ILI9341_Write_Data(0x40|0x08);
-			LCD_WIDTH = 240;
-			LCD_HEIGHT = 320;
-			break;
-		case SCREEN_HORIZONTAL_1:
-			ILI9341_Write_Data(0x20|0x08);
-			LCD_WIDTH  = 320;
-			LCD_HEIGHT = 240;
-			break;
-		case SCREEN_VERTICAL_2:
-			ILI9341_Write_Data(0x80|0x08);
-			LCD_WIDTH  = 240;
-			LCD_HEIGHT = 320;
-			break;
-		case SCREEN_HORIZONTAL_2:
-			ILI9341_Write_Data(0x40|0x80|0x20|0x08);
-			LCD_WIDTH  = 320;
-			LCD_HEIGHT = 240;
-			break;
-		default:
-			break;
+		ILI9341_Write_Data(rot_table[Rotation].data);
+		LCD_WIDTH  = rot_table[Rotation].w;
+		LCD_HEIGHT = rot_table[Rotation].h;
 	}
 }
 
@@ -130,138 +115,37 @@ void ILI9341_Set_Rotation(uint8_t Rotation)
 //>>>>>>>>>>Initialize LCD display
 void ILI9341_Init(void)
 {
-	DISP_RST_WORK; /*Enable LCD display*/
-	DISP_CS_SELECT; /* Initialize SPI */
+	DISP_RST_WORK;
+	DISP_CS_SELECT;
 	ILI9341_Reset();
 
-	//SOFTWARE RESET
 	ILI9341_Write_Command(0x01);
 	HAL_Delay(1000);
 
-	//POWER CONTROL A
-	ILI9341_Write_Command(0xCB);
-	ILI9341_Write_Data(0x39);
-	ILI9341_Write_Data(0x2C);
-	ILI9341_Write_Data(0x00);
-	ILI9341_Write_Data(0x34);
-	ILI9341_Write_Data(0x02);
+	ILI9341_Write_Command(0xCB); ILI9341_Write_Data(0x39); ILI9341_Write_Data(0x2C); ILI9341_Write_Data(0x00); ILI9341_Write_Data(0x34); ILI9341_Write_Data(0x02);
+	ILI9341_Write_Command(0xCF); ILI9341_Write_Data(0x00); ILI9341_Write_Data(0xC1); ILI9341_Write_Data(0x30);
+	ILI9341_Write_Command(0xE8); ILI9341_Write_Data(0x85); ILI9341_Write_Data(0x00); ILI9341_Write_Data(0x78);
+	ILI9341_Write_Command(0xEA); ILI9341_Write_Data(0x00); ILI9341_Write_Data(0x00);
+	ILI9341_Write_Command(0xED); ILI9341_Write_Data(0x64); ILI9341_Write_Data(0x03); ILI9341_Write_Data(0x12); ILI9341_Write_Data(0x81);
+	ILI9341_Write_Command(0xF7); ILI9341_Write_Data(0x20);
+	ILI9341_Write_Command(0xC0); ILI9341_Write_Data(0x23);
+	ILI9341_Write_Command(0xC1); ILI9341_Write_Data(0x10);
+	ILI9341_Write_Command(0xC5); ILI9341_Write_Data(0x3E); ILI9341_Write_Data(0x28);
+	ILI9341_Write_Command(0xC7); ILI9341_Write_Data(0x86);
+	ILI9341_Write_Command(0x36); ILI9341_Write_Data(0x48);
+	ILI9341_Write_Command(0x3A); ILI9341_Write_Data(0x55);
+	ILI9341_Write_Command(0xB1); ILI9341_Write_Data(0x00); ILI9341_Write_Data(0x18);
+	ILI9341_Write_Command(0xB6); ILI9341_Write_Data(0x08); ILI9341_Write_Data(0x82); ILI9341_Write_Data(0x27);
+	ILI9341_Write_Command(0xF2); ILI9341_Write_Data(0x00);
+	ILI9341_Write_Command(0x26); ILI9341_Write_Data(0x01);
+	ILI9341_Write_Command(0xE0); ILI9341_Write_Data(0x0F); ILI9341_Write_Data(0x31); ILI9341_Write_Data(0x2B); ILI9341_Write_Data(0x0C); ILI9341_Write_Data(0x0E); ILI9341_Write_Data(0x08); ILI9341_Write_Data(0x4E); ILI9341_Write_Data(0xF1); ILI9341_Write_Data(0x37); ILI9341_Write_Data(0x07); ILI9341_Write_Data(0x10); ILI9341_Write_Data(0x03); ILI9341_Write_Data(0x0E); ILI9341_Write_Data(0x09); ILI9341_Write_Data(0x00);
+	ILI9341_Write_Command(0xE1); ILI9341_Write_Data(0x00); ILI9341_Write_Data(0x0E); ILI9341_Write_Data(0x14); ILI9341_Write_Data(0x03); ILI9341_Write_Data(0x11); ILI9341_Write_Data(0x07); ILI9341_Write_Data(0x31); ILI9341_Write_Data(0xC1); ILI9341_Write_Data(0x48); ILI9341_Write_Data(0x08); ILI9341_Write_Data(0x0F); ILI9341_Write_Data(0x0C); ILI9341_Write_Data(0x31); ILI9341_Write_Data(0x36); ILI9341_Write_Data(0x0F);
 
-	//POWER CONTROL B
-	ILI9341_Write_Command(0xCF);
-	ILI9341_Write_Data(0x00);
-	ILI9341_Write_Data(0xC1);
-	ILI9341_Write_Data(0x30);
-
-	//DRIVER TIMING CONTROL A
-	ILI9341_Write_Command(0xE8);
-	ILI9341_Write_Data(0x85);
-	ILI9341_Write_Data(0x00);
-	ILI9341_Write_Data(0x78);
-
-	//DRIVER TIMING CONTROL B
-	ILI9341_Write_Command(0xEA);
-	ILI9341_Write_Data(0x00);
-	ILI9341_Write_Data(0x00);
-
-	//POWER ON SEQUENCE CONTROL
-	ILI9341_Write_Command(0xED);
-	ILI9341_Write_Data(0x64);
-	ILI9341_Write_Data(0x03);
-	ILI9341_Write_Data(0x12);
-	ILI9341_Write_Data(0x81);
-
-	//PUMP RATIO CONTROL
-	ILI9341_Write_Command(0xF7);
-	ILI9341_Write_Data(0x20);
-
-	//POWER CONTROL,VRH[5:0]
-	ILI9341_Write_Command(0xC0);
-	ILI9341_Write_Data(0x23);
-
-	//POWER CONTROL,SAP[2:0];BT[3:0]
-	ILI9341_Write_Command(0xC1);
-	ILI9341_Write_Data(0x10);
-
-	//VCM CONTROL
-	ILI9341_Write_Command(0xC5);
-	ILI9341_Write_Data(0x3E);
-	ILI9341_Write_Data(0x28);
-
-	//VCM CONTROL 2
-	ILI9341_Write_Command(0xC7);
-	ILI9341_Write_Data(0x86);
-
-	//MEMORY ACCESS CONTROL
-	ILI9341_Write_Command(0x36);
-	ILI9341_Write_Data(0x48);
-
-	//PIXEL FORMAT
-	ILI9341_Write_Command(0x3A);
-	ILI9341_Write_Data(0x55);
-
-	//FRAME RATIO CONTROL, STANDARD RGB COLOR
-	ILI9341_Write_Command(0xB1);
-	ILI9341_Write_Data(0x00);
-	ILI9341_Write_Data(0x18);
-
-	//DISPLAY FUNCTION CONTROL
-	ILI9341_Write_Command(0xB6);
-	ILI9341_Write_Data(0x08);
-	ILI9341_Write_Data(0x82);
-	ILI9341_Write_Data(0x27);
-
-	//3GAMMA FUNCTION DISABLE
-	ILI9341_Write_Command(0xF2);
-	ILI9341_Write_Data(0x00);
-
-	//GAMMA CURVE SELECTED
-	ILI9341_Write_Command(0x26);
-	ILI9341_Write_Data(0x01);
-
-	//POSITIVE GAMMA CORRECTION
-	ILI9341_Write_Command(0xE0);
-	ILI9341_Write_Data(0x0F);
-	ILI9341_Write_Data(0x31);
-	ILI9341_Write_Data(0x2B);
-	ILI9341_Write_Data(0x0C);
-	ILI9341_Write_Data(0x0E);
-	ILI9341_Write_Data(0x08);
-	ILI9341_Write_Data(0x4E);
-	ILI9341_Write_Data(0xF1);
-	ILI9341_Write_Data(0x37);
-	ILI9341_Write_Data(0x07);
-	ILI9341_Write_Data(0x10);
-	ILI9341_Write_Data(0x03);
-	ILI9341_Write_Data(0x0E);
-	ILI9341_Write_Data(0x09);
-	ILI9341_Write_Data(0x00);
-
-	//NEGATIVE GAMMA CORRECTION
-	ILI9341_Write_Command(0xE1);
-	ILI9341_Write_Data(0x00);
-	ILI9341_Write_Data(0x0E);
-	ILI9341_Write_Data(0x14);
-	ILI9341_Write_Data(0x03);
-	ILI9341_Write_Data(0x11);
-	ILI9341_Write_Data(0x07);
-	ILI9341_Write_Data(0x31);
-	ILI9341_Write_Data(0xC1);
-	ILI9341_Write_Data(0x48);
-	ILI9341_Write_Data(0x08);
-	ILI9341_Write_Data(0x0F);
-	ILI9341_Write_Data(0x0C);
-	ILI9341_Write_Data(0x31);
-	ILI9341_Write_Data(0x36);
-	ILI9341_Write_Data(0x0F);
-
-	//EXIT SLEEP
 	ILI9341_Write_Command(0x11);
 	HAL_Delay(120);
 
-	//TURN ON DISPLAY
 	ILI9341_Write_Command(0x29);
 
-	//STARTING ROTATION
 	ILI9341_Set_Rotation(SCREEN_HORIZONTAL_2);
 }
 
@@ -317,7 +201,6 @@ void ILI9341_Draw_Pixel(uint16_t X, uint16_t Y, uint16_t Colour)
 {
 	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
 
-	//ADDRESS
 	DISP_DC_CMD;
 	DISP_CS_SELECT;
 	DISP_SPI->DR = 0x2A;
@@ -335,7 +218,6 @@ void ILI9341_Draw_Pixel(uint16_t X, uint16_t Y, uint16_t Colour)
 	while(!(DISP_SPI->SR & SPI_SR_TXE));
 	while(DISP_SPI->SR & SPI_SR_BSY);
 
-	//ADDRESS
 	DISP_DC_CMD;
 	DISP_SPI->DR = 0x2B;
 	while(!(DISP_SPI->SR & SPI_SR_TXE));
@@ -352,7 +234,6 @@ void ILI9341_Draw_Pixel(uint16_t X, uint16_t Y, uint16_t Colour)
 	while(!(DISP_SPI->SR & SPI_SR_TXE));
 	while(DISP_SPI->SR & SPI_SR_BSY);
 
-	//ADDRESS
 	DISP_DC_CMD;
 	DISP_SPI->DR = 0x2C;
 	while(!(DISP_SPI->SR & SPI_SR_TXE));
@@ -373,15 +254,8 @@ void ILI9341_Draw_Rectangle(uint16_t X, uint16_t Y, uint16_t Width, uint16_t Hei
 {
 	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
 
-	if((X + Width - 1) >= LCD_WIDTH)
-	{
-		Width = LCD_WIDTH - X;
-	}
-
-	if((Y + Height - 1) >= LCD_HEIGHT)
-	{
-		Height = LCD_HEIGHT - Y;
-	}
+	if((X + Width - 1) >= LCD_WIDTH) Width = LCD_WIDTH - X;
+	if((Y + Height - 1) >= LCD_HEIGHT) Height = LCD_HEIGHT - Y;
 
 	ILI9341_Set_Address(X, Y, X + Width - 1, Y + Height - 1);
 	ILI9341_Draw_Colour_Burst(Colour, Height * Width);
@@ -391,11 +265,7 @@ void ILI9341_Draw_Rectangle(uint16_t X, uint16_t Y, uint16_t Width, uint16_t Hei
 void ILI9341_Draw_Horizontal_Line(uint16_t X, uint16_t Y, uint16_t Width, uint16_t Colour)
 {
 	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
-
-	if((X + Width - 1) >= LCD_WIDTH)
-	{
-		Width = LCD_WIDTH - X;
-	}
+	if((X + Width - 1) >= LCD_WIDTH) Width = LCD_WIDTH - X;
 
 	ILI9341_Set_Address(X, Y, X + Width - 1, Y);
 	ILI9341_Draw_Colour_Burst(Colour, Width);
@@ -405,24 +275,18 @@ void ILI9341_Draw_Horizontal_Line(uint16_t X, uint16_t Y, uint16_t Width, uint16
 void ILI9341_Draw_Vertical_Line(uint16_t X, uint16_t Y, uint16_t Height, uint16_t Colour)
 {
 	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
-
-	if((Y + Height - 1) >= LCD_HEIGHT)
-	{
-		Height = LCD_HEIGHT - Y;
-	}
+	if((Y + Height - 1) >= LCD_HEIGHT) Height = LCD_HEIGHT - Y;
 
 	ILI9341_Set_Address(X, Y, X, Y + Height - 1);
 	ILI9341_Draw_Colour_Burst(Colour, Height);
 }
 
-//>>>>>>>>>>Нарисуйте полый круг в точках X,Y с заданным радиусом и цветом. X и Y обозначают центр окружности
+//>>>>>>>>>>Нарисуйте полый круг в точках X,Y с заданным радиусом и цветом
 void ILI9341_Draw_Hollow_Circle(uint16_t X, uint16_t Y, uint16_t Radius, uint16_t Colour)
 {
 	int x = Radius - 1;
 	int y = 0;
-	int dx = 1;
-	int dy = 1;
-	int err = dx - (Radius << 1);
+	int dx = 1, dy = 1, err = dx - (Radius << 1);
 
 	while (x >= y)
 	{
@@ -435,206 +299,72 @@ void ILI9341_Draw_Hollow_Circle(uint16_t X, uint16_t Y, uint16_t Radius, uint16_
 			ILI9341_Draw_Pixel(X + y, Y - x, Colour);
 			ILI9341_Draw_Pixel(X + x, Y - y, Colour);
 
-			if (err <= 0)
-			{
-					y++;
-					err += dy;
-					dy += 2;
-			}
-
-			if (err > 0)
-			{
-					x--;
-					dx += 2;
-					err += (-Radius << 1) + dx;
-			}
+			if (err <= 0) { y++; err += dy; dy += 2; }
+			if (err > 0)  { x--; dx += 2; err += (-Radius << 1) + dx; }
 	}
 }
 
-//>>>>>>>>>>Нарисуйте закрашенный круг в точках X,Y с заданным радиусом и цветом. X и Y обозначают центр окружности
+//>>>>>>>>>>Нарисуйте закрашенный круг в точках X,Y с заданным радиусом и цветом
 void ILI9341_Draw_Filled_Circle(uint16_t X, uint16_t Y, uint16_t Radius, uint16_t Colour)
 {
-	int x = Radius;
-	int y = 0;
-	int xChange = 1 - (Radius << 1);
-	int yChange = 0;
-	int radiusError = 0;
-	
+	int x = Radius, y = 0;
+	int xChange = 1 - (Radius << 1), yChange = 0, radiusError = 0;
+
 	while (x >= y)
 	{
 		for (int i = X - x; i <= X + x; i++)
-		{
-			ILI9341_Draw_Pixel(i, Y + y,Colour);
-			ILI9341_Draw_Pixel(i, Y - y,Colour);
-		}
-
+			{ ILI9341_Draw_Pixel(i, Y + y, Colour); ILI9341_Draw_Pixel(i, Y - y, Colour); }
 		for (int i = X - y; i <= X + y; i++)
-		{
-			ILI9341_Draw_Pixel(i, Y + x,Colour);
-			ILI9341_Draw_Pixel(i, Y - x,Colour);
-		}
+			{ ILI9341_Draw_Pixel(i, Y + x, Colour); ILI9341_Draw_Pixel(i, Y - x, Colour); }
 
-		y++;
-		radiusError += yChange;
-		yChange += 2;
-
-		if(((radiusError << 1) + xChange) > 0)
-		{
-			x--;
-			radiusError += xChange;
-			xChange += 2;
-		}
+		y++; radiusError += yChange; yChange += 2;
+		if(((radiusError << 1) + xChange) > 0) { x--; radiusError += xChange; xChange += 2; }
 	}
 }
 
 //>>>>>>>>>>Нарисуйте полый прямоугольник между позициями X0,Y0 и X1,Y1 заданным цветом
 void ILI9341_Draw_Hollow_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, uint16_t Y1, uint16_t Colour)
 {
-	uint16_t 	X_length = 0;
-	uint16_t 	Y_length = 0;
-	uint8_t		Negative_X = 0;
-	uint8_t 	Negative_Y = 0;
-	int32_t 	Calc_Negative = 0;
-	
-	Calc_Negative = X1 - X0;
-	if(Calc_Negative < 0) Negative_X = 1;
-	Calc_Negative = 0;
-	
-	Calc_Negative = Y1 - Y0;
-	if(Calc_Negative < 0) Negative_Y = 1;
-	
-	//DRAW HORIZONTAL!
-	if(!Negative_X)
-	{
-		X_length = X1 - X0;		
-	}
-	else
-	{
-		X_length = X0 - X1;		
-	}
+    uint16_t x_len, y_len;
 
-	ILI9341_Draw_Horizontal_Line(X0, Y0, X_length, Colour);
-	ILI9341_Draw_Horizontal_Line(X0, Y1, X_length, Colour);
-	
-	//DRAW VERTICAL!
-	if(!Negative_Y)
-	{
-		Y_length = Y1 - Y0;		
-	}
-	else
-	{
-		Y_length = Y0 - Y1;		
-	}
+    if (X1 >= X0) x_len = X1 - X0; else { x_len = X0 - X1; uint16_t t = X0; X0 = X1; X1 = t; }
+    if (Y1 >= Y0) y_len = Y1 - Y0; else { y_len = Y0 - Y1; uint16_t t = Y0; Y0 = Y1; Y1 = t; }
 
-	ILI9341_Draw_Vertical_Line(X0, Y0, Y_length, Colour);
-	ILI9341_Draw_Vertical_Line(X1, Y0, Y_length, Colour);
-	
-	if((X_length > 0)||(Y_length > 0)) 
-	{
+	ILI9341_Draw_Horizontal_Line(X0, Y0, x_len, Colour);
+	ILI9341_Draw_Horizontal_Line(X0, Y1, x_len, Colour);
+	ILI9341_Draw_Vertical_Line(X0, Y0, y_len, Colour);
+	ILI9341_Draw_Vertical_Line(X1, Y0, y_len, Colour);
+
+	if((x_len > 0)||(y_len > 0))
 		ILI9341_Draw_Pixel(X1, Y1, Colour);
-	}
 }
 
 //>>>>>>>>>>Нарисуйте заполненный прямоугольник между позициями X0,Y0 и X1,Y1 заданным цветом
 void ILI9341_Draw_Filled_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, uint16_t Y1, uint16_t Colour)
 {
-	uint16_t 	X_length = 0;
-	uint16_t 	Y_length = 0;
-	uint8_t		Negative_X = 0;
-	uint8_t 	Negative_Y = 0;
-	int32_t 	Calc_Negative = 0;
-	
-	uint16_t X0_true = 0;
-	uint16_t Y0_true = 0;
-	
-	Calc_Negative = X1 - X0;
-	if(Calc_Negative < 0) Negative_X = 1;
-	Calc_Negative = 0;
-	
-	Calc_Negative = Y1 - Y0;
-	if(Calc_Negative < 0) Negative_Y = 1;
-	
-	//DRAW HORIZONTAL!
-	if(!Negative_X)
-	{
-		X_length = X1 - X0;
-		X0_true = X0;
-	}
-	else
-	{
-		X_length = X0 - X1;
-		X0_true = X1;
-	}
-	
-	//DRAW VERTICAL!
-	if(!Negative_Y)
-	{
-		Y_length = Y1 - Y0;
-		Y0_true = Y0;		
-	}
-	else
-	{
-		Y_length = Y0 - Y1;
-		Y0_true = Y1;	
-	}
-	
-	ILI9341_Draw_Rectangle(X0_true, Y0_true, X_length, Y_length, Colour);	
+    uint16_t x_len, y_len;
+
+    if (X1 >= X0) x_len = X1 - X0; else { x_len = X0 - X1; uint16_t t = X0; X0 = X1; X1 = t; }
+    if (Y1 >= Y0) y_len = Y1 - Y0; else { y_len = Y0 - Y1; uint16_t t = Y0; Y0 = Y1; Y1 = t; }
+
+	ILI9341_Draw_Rectangle(X0, Y0, x_len, y_len, Colour);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void ILI9341_Random_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
 {
-	// Bresenham's algorithm - thx wikpedia
-
 	int16_t steep = abs(y2 - y1) > abs(x2 - x1);
+	if(steep) { swap(x1, y1); swap(x2, y2); }
+	if(x1 > x2) { swap(x1, x2); swap(y1, y2); }
 
-	if(steep)
-	{
-		swap(x1, y1);
-		swap(x2, y2);
-	}
-
-	if(x1 > x2)
-	{
-		swap(x1, x2);
-		swap(y1, y2);
-	}
-
-	int16_t dx, dy;
-
-	dx = x2 - x1;
-	dy = abs(y2 - y1);
-
-	int16_t err = dx / 2;
-	int16_t ystep;
-
-	if(y1 < y2)
-	{
-		ystep = 1;
-	}
-	else
-	{
-		ystep = -1;
-	}
+	int16_t dx = x2 - x1, dy = abs(y2 - y1), err = dx / 2, ystep = (y1 < y2) ? 1 : -1;
 
 	for(; x1 <= x2; x1++)
 	{
-		if(steep)
-		{
-			ILI9341_Draw_Pixel(y1, x1, color);
-		}
-		else
-		{
-			ILI9341_Draw_Pixel(x1, y1, color);
-		}
-
+		if(steep) ILI9341_Draw_Pixel(y1, x1, color);
+		else ILI9341_Draw_Pixel(x1, y1, color);
 		err -= dy;
-
-		if(err < 0)
-		{
-			y1 += ystep;
-			err += dx;
-		}
+		if(err < 0) { y1 += ystep; err += dx; }
 	}
 }
 
@@ -695,16 +425,9 @@ void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, 
             x = 0;
             y += font.height;
 
-            if(y + font.height >= ILI9341_SCREEN_HEIGHT)
-            {
-                break;
-            }
+            if(y + font.height >= ILI9341_SCREEN_HEIGHT) break;
 
-            if(*str == ' ')
-            {
-                str++;
-                continue;
-            }
+            if(*str == ' ') { str++; continue; }
         }
 
         ILI9341_WriteChar(x, y, *str, font, color, bgcolor);
@@ -712,7 +435,5 @@ void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, 
         str++;
     }
 }
-
-
 
 

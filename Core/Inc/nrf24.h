@@ -9,8 +9,6 @@
 //>>>>>>>>>>
 #include "main.h"
 #include "stm32l1xx_hal.h"
-#include <string.h>
-#include "button.h"
 //------------------------------------------------
 #define CS_ON 				HAL_GPIO_WritePin(GPIOB, NRF_CSN_Pin, GPIO_PIN_RESET)
 #define CS_OFF 				HAL_GPIO_WritePin(GPIOB, NRF_CSN_Pin, GPIO_PIN_SET)
