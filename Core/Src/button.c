@@ -15,7 +15,7 @@
 #include <string.h>
 
 extern uint8_t rx_data;
-extern uint8_t on_off;
+extern uint8_t falstart_enabled;
 extern uint16_t key_nr;
 extern uint8_t timer_running;
 extern uint8_t flag_press;
@@ -113,7 +113,7 @@ void Button_transmiter(void)
 		if(rx_data >= 0x01 && rx_data <= 0x08)
 		{
 			uint8_t team_idx = rx_data - 1;
-			uint8_t is_false_start = (on_off == 0 && timer_running == 0);
+			uint8_t is_false_start = (falstart_enabled && timer_running == 0);
 
 			key_nr = rx_data;
 
@@ -132,7 +132,7 @@ void Button_transmiter(void)
 			{
 				ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
 				ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
-				ILI9341_WriteString(230, 105, "TAIMER", Font_7x10, BLACK, WHITE);
+				ILI9341_WriteString(230, 105, "TIMER", Font_7x10, BLACK, WHITE);
 			}
 		}
 		HAL_TIM_Base_Stop_IT(&htim2);
@@ -186,12 +186,12 @@ void definition_of_coordinates(void)
 			HAL_Delay(500);
 		}
 		//>>>>>>>>>>Настройки фальшстарта
-		if(on_off==0)
+		if(falstart_enabled)
 		{
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 		}
-		else if(on_off==1)
+		else
 		{
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
@@ -202,9 +202,9 @@ void definition_of_coordinates(void)
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	case 1:
 		editing_result();//редактирование результата
-		if(on_off==0)
+		if(falstart_enabled)
 			{
-			reset_timer();//выключение кнопки "reset taimer"
+			reset_timer();//выключение кнопки "reset timer"
 			}
 	  if(x > 300 && x < 320 && y > 0 && y < 20)//если нажали крестик
 	  {
@@ -229,13 +229,13 @@ void definition_of_coordinates(void)
 	  }
 	  else if(x > 40 && x < 60 && y > 80 && y < 100)//Фальшстарт ON
 	  {
-		  on_off=0;
+		  falstart_enabled=1;
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 	  }
 	  else if(x > 100 && x < 130 && y > 80 && y < 100)//Фальшстарт OFF
 	  {
-		  on_off=1;
+		  falstart_enabled=0;
 		  ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 		  ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 	  }
