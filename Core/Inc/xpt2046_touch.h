@@ -8,7 +8,6 @@
 #ifndef XPT2046_TOUCH_H_
 #define XPT2046_TOUCH_H_
 
-
 extern SPI_HandleTypeDef hspi2;
 #define TOUCH_SPI_PTR 		 &hspi2
 

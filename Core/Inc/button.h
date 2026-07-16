@@ -13,12 +13,10 @@
 #define BUTTON_PIN_RIGHT right_key_Pin
 #define BUTTON_PORT GPIOB
 
-
 uint8_t Button_Read_left(void);
 uint8_t Button_Read_centr(void);
 uint8_t Button_Read_right(void);
 void Button_Press_handler(void);
 void Touchscreen_handler(void);
-
 
 #endif /* INC_BUTTON_H_ */
