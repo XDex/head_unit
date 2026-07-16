@@ -3,6 +3,14 @@
 
 #include "ILI9341_GFX.h"
 
+typedef enum {
+    MAIN_MENU 	= 0,
+    BRAIN_RING 	= 1,
+	SIMPLE	 	= 2,
+    ERUDIT		= 3,
+    SETTINGS 	= 4
+} game_screen;
+
 void Touchscreen_handler();
 void screen_menu();
 void screen_Brain_Ring();
