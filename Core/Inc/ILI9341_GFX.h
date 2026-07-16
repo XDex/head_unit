@@ -1,5 +1,4 @@
 
-
 #ifndef ILI9341_GFX_H
 #define ILI9341_GFX_H
 
@@ -73,12 +72,12 @@ void ILI9341_Draw_Filled_Circle(uint16_t X, uint16_t Y, uint16_t Radius, uint16_
 void ILI9341_Draw_Hollow_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, uint16_t Y1, uint16_t Colour);
 void ILI9341_Draw_Filled_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, uint16_t Y1, uint16_t Colour);
 void ILI9341_Draw_Char(char character, uint16_t X, uint16_t Y, uint16_t colour, uint16_t size, uint16_t background_colour);
-void ILI9341_Draw_Text(const char* text, uint16_t X, uint16_t Y, uint16_t colour, uint16_t size, uint16_t background_Colour);
+void ILI9341_Draw_Text(const char *text, uint16_t X, uint16_t Y, uint16_t colour, uint16_t size, uint16_t background_Colour);
 void ILI9341_Draw_Filled_Rectangle_Size_Text(uint16_t X0, uint16_t Y0, uint16_t Size_X, uint16_t Size_Y, uint16_t Colour);
-void ILI9341_Draw_Image(const char *image_array, uint16_t x_coordinat, uint16_t y_coordinat, uint16_t img_width, uint16_t img_height, uint32_t s_img);
-void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor);
+void ILI9341_Draw_Image(const char *image_array, uint16_t x_coordinat, uint16_t y_coordinat, uint16_t img_width, uint16_t img_height,
+		uint32_t s_img);
+void ILI9341_WriteString(uint16_t x, uint16_t y, const char *str, FontDef font, uint16_t color, uint16_t bgcolor);
 void ILI9341_Random_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 
 #endif
-
 

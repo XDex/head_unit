@@ -252,10 +252,13 @@ void ILI9341_Draw_Pixel(uint16_t X, uint16_t Y, uint16_t Colour)
 //>>>>>>>>>>НАРИСУЙТЕ ПРЯМОУГОЛЬНИК ЗАДАННОГО РАЗМЕРА И ВЫСОТЫ В ТОЧКАХ X и Y ПРОИЗВОЛЬНЫМ ЦВЕТОМ
 void ILI9341_Draw_Rectangle(uint16_t X, uint16_t Y, uint16_t Width, uint16_t Height, uint16_t Colour)
 {
-	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
+	if ((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT))
+		return;
 
-	if((X + Width - 1) >= LCD_WIDTH) Width = LCD_WIDTH - X;
-	if((Y + Height - 1) >= LCD_HEIGHT) Height = LCD_HEIGHT - Y;
+	if ((X + Width - 1) >= LCD_WIDTH)
+		Width = LCD_WIDTH - X;
+	if ((Y + Height - 1) >= LCD_HEIGHT)
+		Height = LCD_HEIGHT - Y;
 
 	ILI9341_Set_Address(X, Y, X + Width - 1, Y + Height - 1);
 	ILI9341_Draw_Colour_Burst(Colour, Height * Width);
@@ -264,8 +267,10 @@ void ILI9341_Draw_Rectangle(uint16_t X, uint16_t Y, uint16_t Width, uint16_t Hei
 //>>>>>>>>>>ПРОВЕДИТЕ ЛИНИЮ ОТ ТОЧКИ X, Y до ТОЧКИ X+ Ширина, Y
 void ILI9341_Draw_Horizontal_Line(uint16_t X, uint16_t Y, uint16_t Width, uint16_t Colour)
 {
-	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
-	if((X + Width - 1) >= LCD_WIDTH) Width = LCD_WIDTH - X;
+	if ((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT))
+		return;
+	if ((X + Width - 1) >= LCD_WIDTH)
+		Width = LCD_WIDTH - X;
 
 	ILI9341_Set_Address(X, Y, X + Width - 1, Y);
 	ILI9341_Draw_Colour_Burst(Colour, Width);
@@ -274,8 +279,10 @@ void ILI9341_Draw_Horizontal_Line(uint16_t X, uint16_t Y, uint16_t Width, uint16
 //>>>>>>>>>>ПРОВЕДИТЕ ЛИНИЮ ОТ ТОЧКИ X, Y до ТОЧКИ X, Y+ Высота
 void ILI9341_Draw_Vertical_Line(uint16_t X, uint16_t Y, uint16_t Height, uint16_t Colour)
 {
-	if((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT)) return;
-	if((Y + Height - 1) >= LCD_HEIGHT) Height = LCD_HEIGHT - Y;
+	if ((X >= LCD_WIDTH) || (Y >= LCD_HEIGHT))
+		return;
+	if ((Y + Height - 1) >= LCD_HEIGHT)
+		Height = LCD_HEIGHT - Y;
 
 	ILI9341_Set_Address(X, Y, X, Y + Height - 1);
 	ILI9341_Draw_Colour_Burst(Colour, Height);
@@ -290,17 +297,27 @@ void ILI9341_Draw_Hollow_Circle(uint16_t X, uint16_t Y, uint16_t Radius, uint16_
 
 	while (x >= y)
 	{
-			ILI9341_Draw_Pixel(X + x, Y + y, Colour);
-			ILI9341_Draw_Pixel(X + y, Y + x, Colour);
-			ILI9341_Draw_Pixel(X - y, Y + x, Colour);
-			ILI9341_Draw_Pixel(X - x, Y + y, Colour);
-			ILI9341_Draw_Pixel(X - x, Y - y, Colour);
-			ILI9341_Draw_Pixel(X - y, Y - x, Colour);
-			ILI9341_Draw_Pixel(X + y, Y - x, Colour);
-			ILI9341_Draw_Pixel(X + x, Y - y, Colour);
+		ILI9341_Draw_Pixel(X + x, Y + y, Colour);
+		ILI9341_Draw_Pixel(X + y, Y + x, Colour);
+		ILI9341_Draw_Pixel(X - y, Y + x, Colour);
+		ILI9341_Draw_Pixel(X - x, Y + y, Colour);
+		ILI9341_Draw_Pixel(X - x, Y - y, Colour);
+		ILI9341_Draw_Pixel(X - y, Y - x, Colour);
+		ILI9341_Draw_Pixel(X + y, Y - x, Colour);
+		ILI9341_Draw_Pixel(X + x, Y - y, Colour);
 
-			if (err <= 0) { y++; err += dy; dy += 2; }
-			if (err > 0)  { x--; dx += 2; err += (-Radius << 1) + dx; }
+		if (err <= 0)
+		{
+			y++;
+			err += dy;
+			dy += 2;
+		}
+		if (err > 0)
+		{
+			x--;
+			dx += 2;
+			err += (-Radius << 1) + dx;
+		}
 	}
 }
 
@@ -313,39 +330,84 @@ void ILI9341_Draw_Filled_Circle(uint16_t X, uint16_t Y, uint16_t Radius, uint16_
 	while (x >= y)
 	{
 		for (int i = X - x; i <= X + x; i++)
-			{ ILI9341_Draw_Pixel(i, Y + y, Colour); ILI9341_Draw_Pixel(i, Y - y, Colour); }
+		{
+			ILI9341_Draw_Pixel(i, Y + y, Colour);
+			ILI9341_Draw_Pixel(i, Y - y, Colour);
+		}
 		for (int i = X - y; i <= X + y; i++)
-			{ ILI9341_Draw_Pixel(i, Y + x, Colour); ILI9341_Draw_Pixel(i, Y - x, Colour); }
+		{
+			ILI9341_Draw_Pixel(i, Y + x, Colour);
+			ILI9341_Draw_Pixel(i, Y - x, Colour);
+		}
 
-		y++; radiusError += yChange; yChange += 2;
-		if(((radiusError << 1) + xChange) > 0) { x--; radiusError += xChange; xChange += 2; }
+		y++;
+		radiusError += yChange;
+		yChange += 2;
+		if (((radiusError << 1) + xChange) > 0)
+		{
+			x--;
+			radiusError += xChange;
+			xChange += 2;
+		}
 	}
 }
 
 //>>>>>>>>>>Нарисуйте полый прямоугольник между позициями X0,Y0 и X1,Y1 заданным цветом
 void ILI9341_Draw_Hollow_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, uint16_t Y1, uint16_t Colour)
 {
-    uint16_t x_len, y_len;
+	uint16_t x_len, y_len;
 
-    if (X1 >= X0) x_len = X1 - X0; else { x_len = X0 - X1; uint16_t t = X0; X0 = X1; X1 = t; }
-    if (Y1 >= Y0) y_len = Y1 - Y0; else { y_len = Y0 - Y1; uint16_t t = Y0; Y0 = Y1; Y1 = t; }
+	if (X1 >= X0)
+		x_len = X1 - X0;
+	else
+	{
+		x_len = X0 - X1;
+		uint16_t t = X0;
+		X0 = X1;
+		X1 = t;
+	}
+	if (Y1 >= Y0)
+		y_len = Y1 - Y0;
+	else
+	{
+		y_len = Y0 - Y1;
+		uint16_t t = Y0;
+		Y0 = Y1;
+		Y1 = t;
+	}
 
 	ILI9341_Draw_Horizontal_Line(X0, Y0, x_len, Colour);
 	ILI9341_Draw_Horizontal_Line(X0, Y1, x_len, Colour);
 	ILI9341_Draw_Vertical_Line(X0, Y0, y_len, Colour);
 	ILI9341_Draw_Vertical_Line(X1, Y0, y_len, Colour);
 
-	if((x_len > 0)||(y_len > 0))
+	if ((x_len > 0) || (y_len > 0))
 		ILI9341_Draw_Pixel(X1, Y1, Colour);
 }
 
 //>>>>>>>>>>Нарисуйте заполненный прямоугольник между позициями X0,Y0 и X1,Y1 заданным цветом
 void ILI9341_Draw_Filled_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, uint16_t Y1, uint16_t Colour)
 {
-    uint16_t x_len, y_len;
+	uint16_t x_len, y_len;
 
-    if (X1 >= X0) x_len = X1 - X0; else { x_len = X0 - X1; uint16_t t = X0; X0 = X1; X1 = t; }
-    if (Y1 >= Y0) y_len = Y1 - Y0; else { y_len = Y0 - Y1; uint16_t t = Y0; Y0 = Y1; Y1 = t; }
+	if (X1 >= X0)
+		x_len = X1 - X0;
+	else
+	{
+		x_len = X0 - X1;
+		uint16_t t = X0;
+		X0 = X1;
+		X1 = t;
+	}
+	if (Y1 >= Y0)
+		y_len = Y1 - Y0;
+	else
+	{
+		y_len = Y0 - Y1;
+		uint16_t t = Y0;
+		Y0 = Y1;
+		Y1 = t;
+	}
 
 	ILI9341_Draw_Rectangle(X0, Y0, x_len, y_len, Colour);
 }
@@ -354,86 +416,108 @@ void ILI9341_Draw_Filled_Rectangle_Coord(uint16_t X0, uint16_t Y0, uint16_t X1, 
 void ILI9341_Random_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
 {
 	int16_t steep = abs(y2 - y1) > abs(x2 - x1);
-	if(steep) { swap(x1, y1); swap(x2, y2); }
-	if(x1 > x2) { swap(x1, x2); swap(y1, y2); }
+	if (steep)
+	{
+		swap(x1, y1);
+		swap(x2, y2);
+	}
+	if (x1 > x2)
+	{
+		swap(x1, x2);
+		swap(y1, y2);
+	}
 
 	int16_t dx = x2 - x1, dy = abs(y2 - y1), err = dx / 2, ystep = (y1 < y2) ? 1 : -1;
 
-	for(; x1 <= x2; x1++)
+	for (; x1 <= x2; x1++)
 	{
-		if(steep) ILI9341_Draw_Pixel(y1, x1, color);
-		else ILI9341_Draw_Pixel(x1, y1, color);
+		if (steep)
+			ILI9341_Draw_Pixel(y1, x1, color);
+		else
+			ILI9341_Draw_Pixel(x1, y1, color);
 		err -= dy;
-		if(err < 0) { y1 += ystep; err += dx; }
+		if (err < 0)
+		{
+			y1 += ystep;
+			err += dx;
+		}
 	}
 }
 
 /////////////////////////////////////// Картинка из массива ///////////////////////////////////////////////////
-void ILI9341_Draw_Image(const char *image_array, uint16_t x_coordinat, uint16_t y_coordinat, uint16_t img_width, uint16_t img_height, uint32_t s_img)
+void ILI9341_Draw_Image(const char *image_array, uint16_t x_coordinat, uint16_t y_coordinat, uint16_t img_width, uint16_t img_height,
+		uint32_t s_img)
 {
 	ILI9341_Set_Address(x_coordinat, y_coordinat, img_width + x_coordinat - 1, img_height + y_coordinat - 1);
 
 	DISP_DC_DATA;
 	DISP_CS_SELECT;
 
-	for(uint32_t i = 0; i < s_img; i++)
+	for (uint32_t i = 0; i < s_img; i++)
 	{
 		DISP_SPI->DR = image_array[i];
-		while(!(DISP_SPI->SR & SPI_SR_TXE));
+		while (!(DISP_SPI->SR & SPI_SR_TXE))
+			;
 	}
 
-	while(!(DISP_SPI->SR & SPI_SR_TXE));
-	while(DISP_SPI->SR & SPI_SR_BSY);
+	while (!(DISP_SPI->SR & SPI_SR_TXE))
+		;
+	while (DISP_SPI->SR & SPI_SR_BSY)
+		;
 	DISP_CS_UNSELECT;
 }
-
 
 // Вывод символа
 static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor)
 {
-    uint32_t i, b, j;
+	uint32_t i, b, j;
 
-    ILI9341_Set_Address(x, y, x + font.width - 1, y + font.height - 1);
+	ILI9341_Set_Address(x, y, x + font.width - 1, y + font.height - 1);
 
-    for(i = 0; i < font.height; i++)
-    {
-        b = font.data[(ch - 32) * font.height + i];
+	for (i = 0; i < font.height; i++)
+	{
+		b = font.data[(ch - 32) * font.height + i];
 
-        for(j = 0; j < font.width; j++)
-        {
-            if((b << j) & 0x8000)
-            {
-                ILI9341_Write_Data(color >> 8);
-                ILI9341_Write_Data(color & 0xFF);
-            }
-            else
-            {
-                ILI9341_Write_Data(bgcolor >> 8);
-                ILI9341_Write_Data(bgcolor & 0xFF);
-            }
-        }
-    }
+		for (j = 0; j < font.width; j++)
+		{
+			if ((b << j) & 0x8000)
+			{
+				ILI9341_Write_Data(color >> 8);
+				ILI9341_Write_Data(color & 0xFF);
+			}
+			else
+			{
+				ILI9341_Write_Data(bgcolor >> 8);
+				ILI9341_Write_Data(bgcolor & 0xFF);
+			}
+		}
+	}
 }
 
 //>>>>>>>>>>Вывод строки
-void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor)
+void ILI9341_WriteString(uint16_t x, uint16_t y, const char *str, FontDef font, uint16_t color, uint16_t bgcolor)
 {
-    while(*str)
-    {
-        if(x + font.width >= ILI9341_SCREEN_WIDTH)
-        {
-            x = 0;
-            y += font.height;
+	while (*str)
+	{
+		if (x + font.width >= ILI9341_SCREEN_WIDTH)
+		{
+			x = 0;
+			y += font.height;
 
-            if(y + font.height >= ILI9341_SCREEN_HEIGHT) break;
+			if (y + font.height >= ILI9341_SCREEN_HEIGHT)
+				break;
 
-            if(*str == ' ') { str++; continue; }
-        }
+			if (*str == ' ')
+			{
+				str++;
+				continue;
+			}
+		}
 
-        ILI9341_WriteChar(x, y, *str, font, color, bgcolor);
-        x += font.width;
-        str++;
-    }
+		ILI9341_WriteChar(x, y, *str, font, color, bgcolor);
+		x += font.width;
+		str++;
+	}
 }
 
 

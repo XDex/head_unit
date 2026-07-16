@@ -52,7 +52,7 @@
 //------------------------------------------------
 #define W_REGISTER 0x20 		//запись в регистр
 //------------------------------------------------
-void NRF24_Read_Buf(uint8_t addr,uint8_t *pBuf,uint8_t bytes);
+void NRF24_Read_Buf(uint8_t addr, uint8_t *pBuf, uint8_t bytes);
 void NRF24_PrintReg(char *name, uint8_t reg);
 void NRF24_ini(void);
 uint8_t NRF24_ReadReg(uint8_t addr);
