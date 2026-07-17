@@ -32,8 +32,12 @@ extern volatile uint8_t reset_timer;		//старт/стоп таймера
 extern uint16_t teams;									//номер команды
 extern uint16_t answer;											//положительный или отрицательный ответ
 
+// macros to check the coordinates in range
+#define IS_WITHIN(x, y, x1, y1, x2, y2) (((x) > (x1)) && ((x) < (x2)) && ((y) > (y1)) && ((y) < (y2)))
+
 static const char *const team_digits[] =
 { "2", "3", "4", "5", "6", "7", "8" };
+static uint32_t last_ui_update = 0;
 
 extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
@@ -155,7 +159,7 @@ void Touchscreen_handler(void)
 		switch (screen)
 		{
 		case MAIN_MENU:
-			if (x > 20 && x < 100 && y > 60 && y < 120) // Brain Ring selected
+            if (IS_WITHIN(x, y, 20, 60, 100, 120)) // Brain Ring selected
 			{
 				//>>>>>>>>>>Сбрасываем очки у всех команд
 				for (uint8_t i = 0; i < 8; i++)
@@ -170,19 +174,19 @@ void Touchscreen_handler(void)
 				screen = BRAIN_RING;					//устанавливаем переменную для страктуры "switch(screen)"
 				break;
 			}
-			else if (x > 120 && x < 200 && y > 60 && y < 120) // Simple selected
+            else if (IS_WITHIN(x, y, 120, 60, 200, 120)) // Simple selected
 			{
 				screen_Simple();
 				screen = SIMPLE;
 				break;
 			}
-			else if (x > 220 && x < 300 && y > 60 && y < 120) // Erudit Quartet selected
+            else if (IS_WITHIN(x, y, 220, 60, 300, 120)) // Erudit Quartet selected
 			{
 				screen_Erudit_Quartet();
 				screen = ERUDIT;
 				break;
 			}
-			else if (x > 20 && x < 300 && y > 150 && y < 210) // если нажали Settings
+            else if (IS_WITHIN(x, y, 20, 150, 300, 210)) // если нажали Settings
 			{
 				screen_setting();
 				//>>>>>>>>>>Блок сохранения количесва команд в игре
@@ -212,7 +216,7 @@ void Touchscreen_handler(void)
 			{
 				do_reset_timer(); //выключение кнопки "reset timer"
 			}
-			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
+            if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
 				screen_menu();
 				screen = MAIN_MENU;
@@ -220,7 +224,7 @@ void Touchscreen_handler(void)
 			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------
 		case SIMPLE:
-			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
+            if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
 				screen_menu();
 				screen = MAIN_MENU;
@@ -228,24 +232,24 @@ void Touchscreen_handler(void)
 			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------
 		case SETTINGS: 	//=============="setting"=================
-			if (x > 300 && x < 320 && y > 0 && y < 20) // если нажали крестик
+			if (IS_WITHIN(x, y, 300, 0, 320, 20)) // если нажали крестик
 			{
 				screen_menu();
 				screen = 0;
 			}
-			else if (x > 40 && x < 60 && y > 80 && y < 100) //Фальшстарт ON
+            else if (IS_WITHIN(x, y, 40, 80, 60, 100)) //Фальшстарт ON
 			{
 				falstart_enabled = 1;
 				ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 				ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 			}
-			else if (x > 100 && x < 130 && y > 80 && y < 100) //Фальшстарт OFF
+            else if (IS_WITHIN(x, y, 100, 80, 130, 100)) //Фальшстарт OFF
 			{
 				falstart_enabled = 0;
 				ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 				ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 			}
-			else if (x > 30 && x < 68 && y > 142 && y < 175) //Если добавляем комманды "-"
+            else if (IS_WITHIN(x, y, 30, 142, 68, 175)) //Если добавляем комманды "-"
 			{
 				teams--;
 				if (teams >= 2 && teams <= 8)
@@ -254,7 +258,7 @@ void Touchscreen_handler(void)
 					HAL_Delay(500);
 				}
 			}
-			else if (x > 90 && x < 128 && y > 142 && y < 175) //Если удаляем комманды "+"
+            else if (IS_WITHIN(x, y, 90, 142, 128, 175)) //Если удаляем комманды "+"
 			{
 				teams++;
 				if (teams >= 2 && teams <= 8)
@@ -263,7 +267,7 @@ void Touchscreen_handler(void)
 					HAL_Delay(500);
 				}
 			}
-			else if (x > 30 && x < 140 && y > 190 && y < 220) //обработчик кнопки "save"
+            else if (IS_WITHIN(x, y, 30, 190, 140, 220)) //обработчик кнопки "save"
 			{
 				screen_menu();
 				screen = MAIN_MENU;
