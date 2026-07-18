@@ -171,7 +171,7 @@ void score_editing_handler(void)
 		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 
-	if (Button_Read_centr() && edit_score != 0)
+	if (Button_Read_center() && edit_score != 0)
 	{
 		draw_edit_buttons();
 		ILI9341_WriteString(30, BUTTON_Y, "yes", Font_7x10, BLUE, WHITE);
@@ -182,7 +182,7 @@ void score_editing_handler(void)
 	}
 }
 
-void do_reset_timer(void)
+void hide_reset_timer_button(void)
 {
 	if (x > 220 && x < 280 && y > 80 && y < 120)
 	{
@@ -190,6 +190,8 @@ void do_reset_timer(void)
 		g_timer_seconds = 60;
 		reset_timer = 1;
 		timer_running = 0;
+		Reset_falstart_state();
+		Reset_falstart_screen();
 		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }
